@@ -19,15 +19,12 @@ class PilhaInt{
     ~PilhaInt(){
       free(pilha);
     }
-    //alocação dinâmica da pilha
-    void alocar(int tamanho){
-      pilha = (int *) malloc(tamanho*sizeof(int));
-      this->tamanho = tamanho;
-    }
     //redimensiona o tamanho da pilha
     void redimensiona(int n){
       pilha = (int *) realloc(pilha, n*sizeof(int));
       tamanho = n;
+      if(topo >= n)
+        topo = n-1;
     }
     int capacidade() const{
       return tamanho;
@@ -57,10 +54,12 @@ class PilhaInt{
     }
     //override do operador de atribuição
     const PilhaInt& operator = (const PilhaInt& p){
-      free(pilha);
-      alocar(p.capacidade());
-      for(topo = -1; topo<p.topo;){
-        empilha(p.pilha[topo+1]);  
+      if(this != &p){
+        free(pilha);
+        alocar(p.capacidade());
+        for(topo = -1; topo<p.topo;){
+          empilha(p.pilha[topo+1]);  
+        }
       }
       return *this;
     }
@@ -73,10 +72,16 @@ class PilhaInt{
     int *pilha;
     int topo;
     int tamanho;
+
+    //alocação dinâmica da pilha
+    void alocar(int tamanho){
+      pilha = (int *) malloc(tamanho*sizeof(int));
+      this->tamanho = tamanho;
+    }
 };
 
   int main(){
-    PilhaInt q(2);
+    /*PilhaInt q(2);
     q << 5 << 6;
     q.print(cout);
     q.redimensiona(1);
@@ -92,5 +97,14 @@ class PilhaInt{
     q.print(cout);
     p.print(cout);
     cout << endl << q.capacidade() << "  -  " << p.capacidade() << endl;
+
+    q = q;
+    */
+    PilhaInt a{7};
+    PilhaInt b{7};
+    a << 8 << 3 << 1 << 4 << 5;
+    b << 0 << 0;
+    a = b;
+    a.print( cout ); cout << endl;
     return 0;
   }
