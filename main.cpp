@@ -99,12 +99,13 @@ class PilhaInt{
     cout << endl << q.capacidade() << "  -  " << p.capacidade() << endl;
 
     q = q;
-    */
+    
     PilhaInt a{7};
     PilhaInt b{7};
     a << 8 << 3 << 1 << 4 << 5;
     b << 0 << 0;
     a = b;
     a.print( cout ); cout << endl;
+    */
     return 0;
   }
