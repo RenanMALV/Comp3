@@ -1,65 +1,62 @@
 #include <iostream>
+#include <vector>
+
 using namespace std;
 
 class PilhaInt{
-  #define DEFAULT_SIZE 10
   public:
     //Construtor padrão
-    PilhaInt(int tamanho = DEFAULT_SIZE) :topo(-1){
+    PilhaInt(){
+    }    
+    //construtor fornecendo um tamanho específico
+    PilhaInt(int tamanho){
       alocar(tamanho);
     }
     //construtor de cópia
-    PilhaInt(PilhaInt& p) :topo(-1){
-      alocar(p.capacidade());
-      for(topo = -1; topo<p.topo;){
-        empilha(p.pilha[topo+1]);
-      };
+    PilhaInt(PilhaInt& p){
+      pilha = p.getPilha();
+      //para vector não é necessário copiar membro a membro da pilha
+      //for(auto i : p.getPilha()){
+      //  empilha(i);
+      //}
     }
-    //destrutor
-    ~PilhaInt(){
-      free(pilha);
-    }
-    //redimensiona o tamanho da pilha
-    void redimensiona(int n){
-      pilha = (int *) realloc(pilha, n*sizeof(int));
-      tamanho = n;
-      if(topo >= n)
-        topo = n-1;
-    }
+
+    const vector<int>& getPilha() const{ return pilha; }
+
     int capacidade() const{
-      return tamanho;
+      return pilha.capacity();
     }
+
     void empilha(int valor){
-      if(topo==tamanho-1){
-        redimensiona(tamanho*2);
-      }
-      pilha[++topo] = valor;
+      pilha.push_back(valor);
     }
     int desempilha(){
-      return pilha[topo--];
+      auto elementoNoTopo = pilha.back();
+      pilha.pop_back();
+      return elementoNoTopo;
     }
     //exibe a pilha em uma stream de output
     void print(ostream& o){
       //pilha não vazia
-      if(topo != -1)
-      o << "[ ";
-      for(int i = -1; i<topo;){
-        i++;
-        o << pilha[i];
-        if(i == topo)
-          o << " ]";
-        else
-          o << ", ";
+      if(!pilha.empty()){
+        o << "[ ";
+        for(auto itr = pilha.cbegin(); itr != pilha.cend(); ++itr){
+          o << *itr;
+          if((itr+1) != pilha.cend())
+            o << ", ";
+        }
+        o << " ]";
       }
+
     }
     //override do operador de atribuição
     const PilhaInt& operator = (const PilhaInt& p){
       if(this != &p){
-        free(pilha);
-        alocar(p.capacidade());
-        for(topo = -1; topo<p.topo;){
-          empilha(p.pilha[topo+1]);  
-        }
+        //para vector não é necessário copiar membro a membro da pilha
+        pilha = p.getPilha();
+        //for(auto pIterator : p.getPilha()){
+        //  empilha(pIterator);  
+        //}
       }
       return *this;
     }
@@ -69,15 +66,8 @@ class PilhaInt{
       return *this;
     }
   private:
-    int *pilha;
-    int topo;
-    int tamanho;
+    vector<int> pilha;
 
-    //alocação dinâmica da pilha
-    void alocar(int tamanho){
-      pilha = (int *) malloc(tamanho*sizeof(int));
-      this->tamanho = tamanho;
-    }
 };
 
   int main(){
@@ -103,8 +93,11 @@ class PilhaInt{
     PilhaInt a{7};
     PilhaInt b{7};
     a << 8 << 3 << 1 << 4 << 5;
+    a.print(cout); cout << endl;
     b << 0 << 0;
     a = b;
+    a.print( cout ); cout << endl;
+    b << 1000;
     a.print( cout ); cout << endl;
     return 0;
   }
