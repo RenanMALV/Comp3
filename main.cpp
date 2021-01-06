@@ -1,85 +1,58 @@
-#include <initializer_list>
+#include <vector>
 #include <iostream>
+#include <math.h>
+#include <string>
+#include <map>
+//#include "apply.cc"
 
 using namespace std;
 
-class AbstractPair {
-  public:
-    virtual void print(ostream& o) = 0;
-};
+double seno( double n ) { return sin(n); }
+int id( int n ) { return n; }
+string roman( int n ) {
+    map<int,string> rom = { { 1, "I" }, { 2, "II" }, { 3, "III" }, { 4, "IV" }, { 5, "V" }, { 6, "VI" }, { 7, "VII" }, { 8, "VIII" } } ; 
 
-template <typename A, typename B>
-class PairImpl : public AbstractPair{
-  public:
-    PairImpl(A argA, B argB) : a(argA), b(argB){
-    }
-    void print(ostream& o){
-      //cout << endl << "[debug] called generic print inside a pair implementation" << endl;
-      o << a << " = " << b;
-    }
-  private:
-    A a;
-    B b;
-};
-
-template <>
-class PairImpl <const char*, int> : public AbstractPair{
-  public:
-    PairImpl(const char* argA, int argB) : a(argA), b(argB){
-       //cout << endl << "[debug] called pair implementation assign constructor" << endl;
-    }
-    void print(ostream& o){
-       //cout << endl << "[debug] called print inside a pair implementation and send result to output stream" << endl;
-      o << a << " = " << b;
-    }
-  private:
-    const char* a;
-    int b;
-};
-
-template <>
-class PairImpl<int, const char*> : public AbstractPair{
-  public:
-    PairImpl(int argA, const char* argB) : a(argA), b(argB){}
-    void print(ostream& o){
-      o << a << " = " << b;
-    }
-  private:
-    int a;
-    const char* b;
-};
-
-class Pair {
-public:
-  template <typename A, typename B>
-  Pair( A a, B b ) {
-    //especialização do tipo de par
-    p = new PairImpl<A, B>(a ,b );
-  }
-  void print(ostream& o){
-    //cout << endl << "[debug] called print inside a pair" << endl;
-    p->print(o);
-  }
-private:
-  AbstractPair *p = nullptr;
-};
-
-void print( ostream& o, initializer_list<Pair> lista ) {
-  //cout << endl << "[debug] static print called" << endl;
-  for( Pair par : lista){
-    //cout << endl << "[debug] Encountered a Pair in initializer list" << endl;
-    par.print(o);
-    o << endl;
-  }
+    return rom[n]; 
 }
 
-int main() {
+struct FunctorSimples { 
+    string operator()( int n ) { return roman( n ) + "!"; }
+};
 
-  Pair p( "1", 2 );
+struct FunctorTemplate { 
+    template <typename T>
+    T operator()( T n ) { return n+n; }
+};
 
-  //print(cout, {p});
+template <typename T>
+ostream& operator << ( ostream& o, const vector<T>& v ) {
+    o << "[ ";
+    for( auto x : v )
+        o << x << " ";
+        
+    return o << "]";
+}
 
-  print( cout, { { "jan", 1 }, { 2, "fev" }, { string( "pi" ), 3.14 } } );
+//Função apply
+//coleção de elementos t
+//função f que será aplicada aos elementos
+//retorno do tipo f(t[n])
+template <typename T,typename F>
+auto apply(T t,F f) -> vector<decltype(f(t.begin()[0]))> {
+  vector<decltype(f(t.begin()[0]))> ret;
+  for(auto element : t){
+    ret.push_back(f(element));
+  }
+  return ret;  
+}
 
-  return 0;  
+int main( int argc, char* argv[]) {     
+
+/* TESTCASE-PLACE-HOLDER */
+  //auto v = ;
+  //cout << typeid(v).name();
+  //auto s = apply( v, roman);
+
+//cout << apply( { 1, 3, 5 }, FunctorSimples() );
+return 0;
 }
