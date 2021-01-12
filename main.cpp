@@ -50,31 +50,6 @@ class Vetor{
       return Atr_opp( this );
     }
 
-    //classe para implementar o operador produto vetorial (**)
-    class prod_vet_opp {
-      private:
-        Vetor *_vetor;
-	      prod_vet_opp( Vetor* va ): _vetor( va ) {}
-        friend class Vetor;
-      public:
-	      prod_vet_opp operator * ( T vb ) {
-	        cout << "*_vetor pv vb" << endl;
-	        return *this;
-	      }
-	    
-    };
-
-
-    //postergando operador de produto vetorial.
-    Vetor<N, T> operator * (prod_vet_opp pv_operation){
-      cout << " prod_vet_opp " << endl;
-      return this;
-    }
-    
-    prod_vet_opp prod_vet_call(){
-      return prod_vet_opp( this );
-    }
-
     //recebe as componentes de um vetor implementado e redireciona para a chamada de função
     T* printable_componentes(){
       return _vetorGeometrico.print_componentes();
@@ -82,16 +57,17 @@ class Vetor{
 
     //Adição de vetores, retorna um vetor.
     template<typename Tv>
-    auto operator + (Vetor<N,Tv>& v)  -> Vetor<N, decltype(this->printable_componentes()[0] + v.printable_componentes()[0])>{
+    auto operator + (Vetor<N,Tv> v)  -> Vetor<N, decltype(this->printable_componentes()[0] + v.printable_componentes()[0])>{
       Vetor<N, decltype(this->printable_componentes()[0] + v.printable_componentes()[0])> resultante;
       for(int i=0; i<N; ++i)
 	      resultante = printable_componentes()[i] + v.printable_componentes()[i];
       return resultante;
     }
+    
 
     //Subtração de vetores, retorna um vetor.
     template<typename Tv>
-    auto operator - (Vetor<N,Tv>& v)  -> Vetor<N, decltype(this->printable_componentes()[0] - v.printable_componentes()[0])>{
+    auto operator - (Vetor<N,Tv> v)  -> Vetor<N, decltype(this->printable_componentes()[0] - v.printable_componentes()[0])>{
       Vetor<N, decltype(this->printable_componentes()[0] - v.printable_componentes()[0])> resultante;
       for(int i=0; i<N; ++i)
 	      resultante = printable_componentes()[i] - v.printable_componentes()[i];
@@ -104,25 +80,28 @@ class Vetor{
 
 //Multiplicação por um escalar, retorna um vetor.
 template<int N, typename Ts, typename Tv>
-Vetor<N, Tv>& operator * (Ts s, Vetor<N, Tv>& v){
+auto operator * (Ts s, Vetor<N, Tv>& v) -> Vetor<N, decltype(v.printable_componentes()[0] * s)> {
+  Vetor<N, decltype(v.printable_componentes()[0] * s)> res;
   for(int i=0; i<N; ++i)
-    v = v.printable_componentes()[i] * s;
-  return v;
+    res = v.printable_componentes()[i] * s;
+  return res;
 }
 //Overload do método para permitir comutatividade.
 template<int N, typename Ts, typename Tv>
-Vetor<N, Tv>& operator * (Vetor<N, Tv>& v, Ts s){
+auto operator * (Vetor<N, Tv>& v, Ts s) -> Vetor<N, decltype(v.printable_componentes()[0] * s)> {
+  Vetor<N, decltype(v.printable_componentes()[0] * s)> res;
   for(int i=0; i<N; ++i)
-    v = v.printable_componentes()[i] * s;
-  return v;
+    res = v.printable_componentes()[i] * s;
+  return res;
 }
 
 //Divisão por um escalar, retorna um vetor.
 template <int N, typename Ts, typename Tv>
-Vetor<N, Tv>& operator / (Vetor<N, Tv>& v, Ts s){
+auto operator / (Vetor<N, Tv>& v, Ts s) -> Vetor<N, decltype(v.printable_componentes()[0] / s)>{
+  Vetor<N, decltype(v.printable_componentes()[0] / s)> res;
   for(int i=0; i<N; ++i)
-    v = v.printable_componentes()[i] / s;;
-  return v;
+    res = v.printable_componentes()[i] / s;;
+  return res;
 }
 
 //Produto escalar, retorna um numerico.
@@ -134,15 +113,36 @@ auto operator * (Vetor<N,Tva>& va, Vetor<N,Tvb>& vb) -> decltype(va.printable_co
   return res;
 }
 
+
+//classe para implementar o operador de produto vetorial (**), quando instanciada, retorna retorna o tipo "operação produto vetorial", que quando multiplicado por um vetor efetua a operação propriamente dita.
+template <int N, typename Tva>
+class prod_vet_opp {
+  private:
+    Vetor<N, Tva> *_vetor;
+    friend class Vetor<N, Tva>;
+  public:
+    prod_vet_opp( Vetor<N, Tva>& va ): _vetor( &va ) {}
+    Tva componente(int axis){
+      return _vetor->printable_componentes()[axis] ;
+    }  
+};
+
+//postergando a operação (**)
 template<int N, typename Tv>
-auto operator * (Vetor<N, Tv> v){
-return v.prod_vet_call();
+prod_vet_opp<N, Tv> operator * (Vetor<N, Tv>& v){
+  return prod_vet_opp(v);
 }
 
-template<int N, typename Tv, typename pv_op>
-Vetor<N, Tv> operator * (Vetor<N, Tv> va, pv_op vb){
-cout << "fora da classe *" << endl;
-return 0;
+//produto vetorial, retorna um vetor
+template<int N, typename Tv, typename Topp>
+auto operator * (Vetor<N, Tv>& v, prod_vet_opp<N, Topp> pv_operation) -> Vetor<N, decltype(v.printable_componentes()[0] * pv_operation.componente(0))>{
+  Vetor<N, decltype(v.printable_componentes()[0] * pv_operation.componente(0))> res;
+  //produto vetorial
+  res = (v.printable_componentes()[1] * pv_operation.componente(2) - pv_operation.componente(1) * v.printable_componentes()[2]);
+  res = (v.printable_componentes()[2] * pv_operation.componente(0) - pv_operation.componente(2) * v.printable_componentes()[0]);
+  res = (v.printable_componentes()[0] * pv_operation.componente(1) - pv_operation.componente(0) * v.printable_componentes()[1]);
+  //todas as componentes do produto vetorial se encontram em res (resultado).
+  return res;
 }
 
 //Definindo shift de um vetor para output stream.
@@ -156,10 +156,10 @@ ostream& operator << (ostream& o, Vetor<N,T> v) {
 
 
 int main( int argc, char* argv[]) {     
-  Vetor<2,double> v1;
-  v1 = 1.5, 2.5;
-  Vetor<2, int> v2;
-  v2 = 2, 2;
-  cout << v1 ** v2 << endl;
-  cout << v2/2  << endl;
+  Vetor<3,double> v1;
+  v1 = 1.3, 2.3, 0;
+  Vetor<3, int> v2;
+  v2 = 2, 2, 0;
+  cout << v1 + v2 + v1 * 2.1 << endl;
+  cout << v2 * v1  << endl;
 }
