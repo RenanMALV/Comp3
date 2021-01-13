@@ -1,20 +1,20 @@
 #include <initializer_list>
 #include <iostream>
+#include <memory>
 
 using namespace std;
 
 class AbstractPair {
   public:
-    virtual void print(ostream& o) = 0;
+    virtual void print(ostream& o) const = 0;
 };
 
 template <typename A, typename B>
 class PairImpl : public AbstractPair{
   public:
-    PairImpl(A argA, B argB) : a(argA), b(argB){
+    PairImpl(A& argA, B& argB) : a(argA), b(argB){
     }
-    void print(ostream& o){
-      //cout << endl << "[debug] called generic print inside a pair implementation" << endl;
+    void print(ostream& o) const{
       o << a << " = " << b;
     }
   private:
@@ -22,64 +22,39 @@ class PairImpl : public AbstractPair{
     B b;
 };
 
-template <>
-class PairImpl <const char*, int> : public AbstractPair{
-  public:
-    PairImpl(const char* argA, int argB) : a(argA), b(argB){
-       //cout << endl << "[debug] called pair implementation assign constructor" << endl;
-    }
-    void print(ostream& o){
-       //cout << endl << "[debug] called print inside a pair implementation and send result to output stream" << endl;
-      o << a << " = " << b;
-    }
-  private:
-    const char* a;
-    int b;
-};
-
-template <>
-class PairImpl<int, const char*> : public AbstractPair{
-  public:
-    PairImpl(int argA, const char* argB) : a(argA), b(argB){}
-    void print(ostream& o){
-      o << a << " = " << b;
-    }
-  private:
-    int a;
-    const char* b;
-};
-
 class Pair {
 public:
   template <typename A, typename B>
   Pair( A a, B b ) {
     //especialização do tipo de par
-    p = new PairImpl<A, B>(a ,b );
+    p = make_shared<PairImpl<A, B>>(a ,b );
   }
-  void print(ostream& o){
-    //cout << endl << "[debug] called print inside a pair" << endl;
+  void print(ostream& o) const {
     p->print(o);
   }
+  ~Pair(){
+    cout << "destrutor de pair" << endl;
+  }
 private:
-  AbstractPair *p = nullptr;
+  shared_ptr<AbstractPair> p;
 };
 
 void print( ostream& o, initializer_list<Pair> lista ) {
-  //cout << endl << "[debug] static print called" << endl;
-  for( Pair par : lista){
-    //cout << endl << "[debug] Encountered a Pair in initializer list" << endl;
-    par.print(o);
+  for( auto i = lista.begin(); i != lista.end(); i++){
+    i->print(o);
     o << endl;
   }
+  cout << "destrutor do par no initializer_list" << endl;
 }
 
 int main() {
 
   Pair p( "1", 2 );
 
-  //print(cout, {p});
+  print(cout, {p});
 
-  print( cout, { { "jan", 1 }, { 2, "fev" }, { string( "pi" ), 3.14 } } );
+  //print( cout, { { "jan", 1 }, { 2, "fev" }, { string( "pi" ), 3.14 } } );
 
+  cout << "destrutor de p na main" << endl;
   return 0;  
 }
