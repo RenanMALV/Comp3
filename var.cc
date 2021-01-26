@@ -29,6 +29,9 @@ private:
 class Int: public Undefined {
 public:
   Int( int n ):n(n) {}
+  virtual void print(ostream& o){
+    o << n;
+  }
 private:
   int n;
 };
@@ -46,6 +49,9 @@ private:
 class Double: public Undefined {
 public:
   Double( double n ):n(n) {}
+  virtual void print(ostream& o){
+    o << n;
+  }
 private:
   double n;
 };
@@ -101,7 +107,6 @@ public:
   Var& operator [] ( string key){
     if ( objs_map.find(key) == objs_map.end() ) {
       objs_map[key] = shared_ptr<Var>( new Var() );
-      cout << "criou " << key << endl;
     }
     cout << "retornando um valor do map" << endl;
     return objs_map[key];

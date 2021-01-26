@@ -33,11 +33,11 @@ int main( int argc, char* argv[] ) try {
   string s = "teste";
   a = "teste";
   cout << a << endl;
-  a = "NEW teste";
+  a = 2;
   cout << a << endl;
   b["atr"] = "string on var";
   cout << b["atr"] << endl;
-  b["atr"] = "NEW string on var";
+  b["atr"] = 2;
   cout << b["atr"] << endl;
   return 0;
 } catch( Var::Erro e ) {
