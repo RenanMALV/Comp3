@@ -13,7 +13,8 @@ class Undefined{
   public:
     virtual void print(ostream& o){
       o << "Undefined";
-    };
+    }
+    
 };
 
 template< typename T>
@@ -21,6 +22,12 @@ class Object: public Undefined {
 public:
   Object( T n ):t(n) {
     //implementar construtor do object
+  }
+  virtual void print(ostream& o){
+    o << t;
+  }
+  T get_obj(){
+    return t;
   }
 private:
   T t;
@@ -59,7 +66,6 @@ private:
 class String: public Undefined {
 public:
   String( string n ):n(n) {
-    cout << "criou a string no map " << endl;
   }
   virtual void print(ostream& o){
     o << n;
@@ -70,35 +76,40 @@ private:
 
 class Var {
 public:
+  //construtor sem parametros inicia em Undefined
   Var(): valor( new Undefined() ) {
-    cout << "init a new Undefined var" << endl;
+  }
+  //construtor com parametros chama os operadores de atribuicao da classe passando o paramentro recebido
+  template< typename N>
+  Var(N arg){
+    *this = arg;
+  }
+  //operador de chamada de função
+  template<typename Func_call_T>
+  auto operator ()(Func_call_T param){
+    return (invoke(valor->get_obj()))(param);
+  }
+
+  template< typename T>
+  Var& operator = (T obj ) {
+    valor = shared_ptr<Object<T>>( new Object( obj ) );
+    return *this;
   }
   
-  template< typename T>
-  Var& operator = ( T obj ) {
-    valor = shared_ptr<Undefined>( new Object( obj ) );
-    return *this;
-  }
-  template<>
   Var& operator = ( int n ) {
-    valor = shared_ptr<Undefined>( new Int( n ) );
+    valor = shared_ptr<Int>( new Int( n ) );
     return *this;
   }
-  template<>
   Var& operator = (const char* n ) {
-    cout << "chamando construtor de char" << endl;
-    valor = shared_ptr<Undefined>( new Char( n ) );
+    valor = shared_ptr<Char>( new Char( n ) );
     return *this;
   }
-  template<>
   Var& operator = ( double n ) {
-    valor = shared_ptr<Undefined>( new Double( n ) );
+    valor = shared_ptr<Double>( new Double( n ) );
     return *this;
   }
-  template<>
   Var& operator = ( string n ) {
-    cout << "chamando o construtor de String" << endl;
-    valor = shared_ptr<Undefined>( new String( n ) );
+    valor = shared_ptr<String>( new String( n ) );
     return *this;
   }
   
@@ -108,8 +119,17 @@ public:
     if ( objs_map.find(key) == objs_map.end() ) {
       objs_map[key] = shared_ptr<Var>( new Var() );
     }
-    cout << "retornando um valor do map" << endl;
     return objs_map[key];
+  }
+
+  //tratando como array de var
+  Var& operator [] ( int key){
+    if(!arr_counter)
+    for ( ; arr_counter<key; ++arr_counter ) {
+      objs_arr[arr_counter] = shared_ptr<Var>( new Var() );
+      return *this;
+    }
+    return objs_arr[key];
   }
 
   void print(ostream& o){
@@ -132,6 +152,8 @@ private:
   
 private:
   map<string,Var> objs_map;
+  map<int,Var> objs_arr;
+  int arr_counter = 0;
   shared_ptr<Undefined> valor;
 };
 
@@ -144,5 +166,4 @@ ostream& operator << (ostream& o, Var& v) {
 	v.print(o);
   return o;
 }
-
 // Int, Char, Double, Object, Function, Array

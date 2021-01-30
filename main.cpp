@@ -20,25 +20,31 @@ Var print( const Var& o ) {
        
   return Var();     
 }
-
+*/
 void imprime( Var v ) {
     v["print"]( v );
 }
-*/
+
 int main( int argc, char* argv[] ) try {     
   
 /* TESTCASE-PLACE-HOLDER */
-  Var a;
-  Var b;
+  Var a, b = 10;
+  cout << a <<b << endl;
+  b = "eu b mudei de tipo";
+  cout << a << b << endl;
   string s = "teste";
-  a = "teste";
+  /*a = "teste";
   cout << a << endl;
   a = 2;
   cout << a << endl;
   b["atr"] = "string on var";
   cout << b["atr"] << endl;
-  b["atr"] = 2;
+  b["atr"] = [](){cout << endl;};
   cout << b["atr"] << endl;
+  Var arr[2];
+  arr[0] = "indice 0";
+  arr[1] = "indice 1";
+  cout << arr[0] << arr[1] << endl;*/
   return 0;
 } catch( Var::Erro e ) {
   cout << "Erro fatal: " << e() << endl;
