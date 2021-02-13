@@ -11,4 +11,6 @@ int main() {
   double v = 7;
   
   cout << "f(" << v << ")=" << f.e( v ) << ", f'(" << v << ")=" << f.dx( v ) << endl;
+
+  cout << "f(x)=" << f.str() << ", f'(x)=" << f.dx_str() << endl;
 }
