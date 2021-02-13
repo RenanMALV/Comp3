@@ -1,51 +1,43 @@
-#include <vector>
 #include <iostream>
-#include <math.h>
-#include <string>
-#include <map>
-#include <type_traits>
-#include <functional>
+#include <algorithm>
+#include <array>
 
-#include "var.cc"
+#include "bind.cc"
 
 using namespace std;
-/*
-Var print( const Var& o ) {
-  cout << "{ nome: " << o["nome"]
-       << ", idade: " << o["idade"]( o )
-       << ", nascimento: " << o["nascimento"]
-       << ", print: " << o["print"] 
-       << ", atr: " << o["atr"] 
-       << " }" << endl;
-       
-  return Var();     
-}
-*/
-void imprime( Var v ) {
-    v["print"]( v );
+
+long mdc( long a, long b ) { return b == 0 ? a : mdc( b, a%b ); }
+
+struct MMC {
+  auto operator()( long a, long b ) { return a*b/mdc(a,b); }    
+};
+
+struct BarraPesada {
+  template <typename A, typename B>
+  auto operator()( A a, B b ) {
+      return a + b;
+  } 
+};
+
+string ordena( string a, string b, string c, string d, string e, string f, string g, string h, string i, string j, string k, string l ) {
+  std::array<string, 12> tab = { a, b, c, d, e, f, g, h, i, j, k, l };
+  string result;
+  
+  std::sort( tab.begin(), tab.end() );
+  for( auto itr = tab.begin(); itr != tab.end(); ++itr )
+    result += *itr + " ";
+  
+  return result;    
 }
 
-int main( int argc, char* argv[] ) try {     
+int main() {
+    
+using ::bind;
   
-/* TESTCASE-PLACE-HOLDER */
-  Var a, b = 10;
-  cout << a <<b << endl;
-  b = "eu b mudei de tipo";
-  cout << a << b << endl;
-  string s = "teste";
-  /*a = "teste";
-  cout << a << endl;
-  a = 2;
-  cout << a << endl;
-  b["atr"] = "string on var";
-  cout << b["atr"] << endl;
-  b["atr"] = [](){cout << endl;};
-  cout << b["atr"] << endl;
-  Var arr[2];
-  arr[0] = "indice 0";
-  arr[1] = "indice 1";
-  cout << arr[0] << arr[1] << endl;*/
+auto f = bind( mdc, 12 ); 
+// f é uma função de um parâmetro que calcula o mdc entre 12 e o parâmetro passado.  
+cout << f( 9 ) << endl;
+ // deve imprimir 3, que é o mdc entre 12 e 9.
+  
   return 0;
-} catch( Var::Erro e ) {
-  cout << "Erro fatal: " << e() << endl;
 }
