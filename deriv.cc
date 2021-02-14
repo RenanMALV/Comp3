@@ -2,9 +2,9 @@
 #include <math.h>
 #include <iostream>
 #include <sstream>
+#include <functional>
 
 using namespace std;
-
 template <typename E, typename Dx,typename S, typename DS>
 struct Par {
     
@@ -17,86 +17,115 @@ struct Par {
       return ret;
     }
 
-    constexpr Par( E e, Dx dx, S s, DS ds ) : e(e), dx(dx), s(s), ds(ds) {}
+    Par(const E& e,const Dx& dx,const S& s,const DS& ds ) : e(e), dx(dx), s(s), ds(ds) {}
 
-    const E e;
-    const Dx dx;
-    const S s;
-    const DS ds;
+    E e;
+    Dx dx;
+    S s;
+    DS ds;
 };
 
-constexpr inline auto x = Par{ 
+
+inline auto x = Par{ 
     []( double v ) { return v; }, 
     []( double v ) { return 1.0; }, 
-    [](){string ret = "x"; return ret; },
-    [](){string ret = "1"; return ret; } 
+    [](){return "x"; },
+    [](){return "1"; } 
   }; 
 
+struct X {
+    
+    string str() const{
+      string ret = s();
+      return ret;
+    }
+    string dx_str() const{
+      string ret = ds();
+      return ret;
+    }
+
+    X(){}
+
+    function<double(double)> e = []( double v ) { return v; };
+    function<double(double)> dx = []( double v ) { return 1.0; };
+    function<string()> s = []() -> string {return "x"; };
+    function<string()> ds = []() -> string {return "1"; };
+};
+
 template <typename A, typename B, typename C, typename D>
-constexpr inline auto trata_cte( Par<A,B,C,D> opr ) { 
+constexpr inline auto trata_cte(const Par<A,B,C,D>& opr ) { 
   return opr;
 }
 
 template <typename C>
-constexpr inline auto trata_cte( C cte ) { 
-  return Par{ 
+constexpr inline auto trata_cte(const C& cte ) {
+  return  Par{ 
       [cte]( double v ) { return cte; }, 
       []( double v ) { return 0.0; },
-      [cte]() { stringstream ret; ret << noshowpoint << cte; return ret.str(); },
-      [cte]() { stringstream ret; ret << "0"; return ret.str(); } 
+      [cte]() { stringstream ret; ret << noshowpoint << cte; return ret.str();},
+      []() { return "0"; }
     };
 }
+auto trata_cte(X cte ) {
+  return Par{ 
+    []( double v ) { return v; }, 
+    []( double v ) { return 1.0; }, 
+    [](){return "x"; },
+    [](){return "1"; } 
+  }; 
 
+}
+ 
 template<typename F, typename G>
-constexpr inline auto operator * ( F f, G g ) {
+constexpr inline auto operator * (const F& f,const G& g ) {
     auto fc = trata_cte( f );
     auto gc = trata_cte( g );
     return Par{ 
-      [fc,gc]( double v ){ return fc.e(v)*gc.e(v); },
-      [fc,gc]( double v ){ return fc.dx(v)*gc.e(v) + fc.e(v)*gc.dx(v); },
-      [fc,gc]() { string ret = "((" + fc.str() + ")*(" + gc.str() + "))"; return ret; },
-      [fc,gc]() { string ret = "((" + fc.dx_str() + ")*(" + gc.str() + ")+(" + fc.str() + ")*(" + gc.dx_str() + "))"; return ret; }
+      [fc, gc]( double v ){ return fc.e(v)*gc.e(v); },
+      [fc, gc]( double v ){ return fc.dx(v)*gc.e(v) + fc.e(v)*gc.dx(v); },
+      [fc, gc]() { string ret = "((" + fc.str() + ")*(" + gc.str() + "))"; return ret; },
+      [fc, gc]() { string ret = "((" + fc.dx_str() + ")*(" + gc.str() + ")+(" + fc.str() + ")*(" + gc.dx_str() + "))"; return ret; }
     };
 }
 
 template<typename F, typename G>
-constexpr inline auto operator + ( F f, G g ) {
+constexpr inline auto operator + (const F& f,const G& g ) {
     auto fc = trata_cte( f );
     auto gc = trata_cte( g );
     return Par{ 
-      [fc,gc]( double v ){ return fc.e(v) + gc.e(v); },
-      [fc,gc]( double v ){ return fc.dx(v) + gc.dx(v); },
-      [fc,gc]() { string ret = "((" + fc.str() + ")+(" + gc.str() + "))"; return ret; },
-      [fc,gc]() { string ret = "((" + fc.dx_str() + ")+(" + gc.dx_str() + "))"; return ret; }
+      [fc, gc]( double v ){ return fc.e(v) + gc.e(v); },
+      [fc, gc]( double v ){ return fc.dx(v) + gc.dx(v); },
+      [fc, gc]() { string ret = "((" + fc.str() + ")+(" + gc.str() + "))"; return ret; },
+      [fc, gc]() { string ret = "((" + fc.dx_str() + ")+(" + gc.dx_str() + "))"; return ret; }
     };
 }
 
 template<typename F, typename G>
-constexpr inline auto operator - ( F f, G g ) {
+constexpr inline auto operator - (const F& f,const G& g ) {
     auto fc = trata_cte( f );
     auto gc = trata_cte( g );
     return Par{ 
-      [fc,gc]( double v ){ return fc.e(v) - gc.e(v); },
-      [fc,gc]( double v ){ return fc.dx(v) - gc.dx(v); },
-      [fc,gc]() { string ret = "((" + fc.str() + ")-(" + gc.str() + "))"; return ret; },
-      [fc,gc]() { string ret = "((" + fc.dx_str() + ")-(" + gc.dx_str() + "))"; return ret; } 
+      [fc, gc]( double v ){ return fc.e(v) - gc.e(v); },
+      [fc, gc]( double v ){ return fc.dx(v) - gc.dx(v); },
+      [fc, gc]() { string ret = "((" + fc.str() + ")-(" + gc.str() + "))"; return ret; },
+      [fc, gc]() { string ret = "((" + fc.dx_str() + ")-(" + gc.dx_str() + "))"; return ret; } 
     };
 }
 
 template<typename F, typename G>
-constexpr inline auto operator / ( F f, G g ) {
+constexpr inline auto operator / (const F& f,const G& g ) {
     auto fc = trata_cte( f );
     auto gc = trata_cte( g );
     return Par{
-      [fc,gc]( double v ){ return fc.e(v) / gc.e(v); },
-      [fc,gc]( double v ){ return (fc.dx(v)*gc.e(v) + fc.e(v)*gc.dx(v))/(gc.e(v)*gc.e(v)); },
-      [fc,gc]() { string ret = "((" + fc.str() + ")/(" + gc.str() + "))"; return ret; },
-      [fc,gc]() { string ret = "(((" + fc.dx_str() + ")*(" + gc.str() + ")+(" + fc.str() + ")*(" + gc.dx_str() + "))/((" + gc.str() + ")*(" + gc.str() + ")))"; return ret; }
+      [fc, gc]( double v ){ return fc.e(v) / gc.e(v); },
+      [fc, gc]( double v ){ return (fc.dx(v)*gc.e(v) + fc.e(v)*gc.dx(v))/(gc.e(v)*gc.e(v)); },
+      [fc, gc]() { string ret = "((" + fc.str() + ")/(" + gc.str() + "))"; return ret; },
+      [fc, gc]() { string ret = "(((" + fc.dx_str() + ")*(" + gc.str() + ")+(" + fc.str() + ")*(" + gc.dx_str() + "))/((" + gc.str() + ")*(" + gc.str() + ")))"; return ret; }
     };
 }
 
 template <typename F, typename G>
-constexpr inline auto operator ->* ( F f, G g ) {
+constexpr inline auto operator ->* (const F& f,const G& g ) {
     static_assert( !is_same_v< double, G >, "Operador de potenciação definido apenas para inteiros" );
 
     auto fc = trata_cte( f );
@@ -109,7 +138,7 @@ constexpr inline auto operator ->* ( F f, G g ) {
 }
 
 template<typename F>
-constexpr inline auto sin( F f ) {
+constexpr inline auto sin(const F& f ) {
     auto fc = trata_cte( f );
     return Par{
       [fc]( double v ){ return sin( fc.e(v) ); }, 
@@ -120,7 +149,7 @@ constexpr inline auto sin( F f ) {
 }
 
 template<typename F>
-constexpr inline auto cos( F f ) {
+constexpr inline auto cos(const F& f ) {
     auto fc = trata_cte( f );
     return Par{
       [fc]( double v ){ return cos( fc.e(v) ); }, 
@@ -131,7 +160,7 @@ constexpr inline auto cos( F f ) {
 }
 
 template<typename F>
-constexpr inline auto exp( F f ) {
+constexpr inline auto exp(const F& f ) {
     auto fc = trata_cte( f );
     return Par{
       [fc]( double v ){ return exp( fc.e(v) ); }, 
@@ -142,7 +171,7 @@ constexpr inline auto exp( F f ) {
 }
 
 template<typename F>
-constexpr inline auto log( F f ) {
+constexpr inline auto log(const F& f ) {
     auto fc = trata_cte( f );
     return Par{ 
       [fc]( double v ){ return log( fc.e(v) ); }, 
