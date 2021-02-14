@@ -7,8 +7,8 @@
 using namespace std;
 
 int main() {
-  auto f = 3.0 * x * x;
-  double v = 7;
+  auto f = exp( (x + 1.0)*(x - 1.0) )->*2;
+  double v = 10;
   
   cout << "f(" << v << ")=" << f.e( v ) << ", f'(" << v << ")=" << f.dx( v ) << endl;
 
