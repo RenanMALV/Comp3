@@ -84,7 +84,7 @@ constexpr inline auto operator * (const F& f,const G& g ) {
       [fc, gc]( double v ){ return fc.e(v)*gc.e(v); },
       [fc, gc]( double v ){ return fc.dx(v)*gc.e(v) + fc.e(v)*gc.dx(v); },
       [fc, gc]() { string ret = "((" + fc.str() + ")*(" + gc.str() + "))"; return ret; },
-      [fc, gc]() { string ret = "((" + fc.dx_str() + ")*(" + gc.str() + ")+(" + fc.str() + ")*(" + gc.dx_str() + "))"; return ret; }
+      [fc, gc]() { string ret = "(" + fc.dx_str() + ")*(" + gc.str() + ")+(" + fc.str() + ")*(" + gc.dx_str() + ")"; return ret; }
     };
 }
 
@@ -120,7 +120,7 @@ constexpr inline auto operator / (const F& f,const G& g ) {
       [fc, gc]( double v ){ return fc.e(v) / gc.e(v); },
       [fc, gc]( double v ){ return (fc.dx(v)*gc.e(v) + fc.e(v)*gc.dx(v))/(gc.e(v)*gc.e(v)); },
       [fc, gc]() { string ret = "((" + fc.str() + ")/(" + gc.str() + "))"; return ret; },
-      [fc, gc]() { string ret = "(((" + fc.dx_str() + ")*(" + gc.str() + ")+(" + fc.str() + ")*(" + gc.dx_str() + "))/((" + gc.str() + ")*(" + gc.str() + ")))"; return ret; }
+      [fc, gc]() { string ret = "(((" + fc.dx_str() + ")*(" + gc.str() + ")-(" + fc.str() + ")*(" + gc.dx_str() + "))/(" + gc.str() + ")^2)"; return ret; }
     };
 }
 
@@ -132,8 +132,8 @@ constexpr inline auto operator ->* (const F& f,const G& g ) {
     return Par{ 
       [fc,g]( double v ){ return pow( fc.e(v), g ); },
       [fc,g]( double v ){ return g*fc.dx(v)*pow( fc.e(v), g-1 ); },
-      [fc,g]() { string ret = "((" + fc.str() + ")^" + to_string(g) + ")"; return ret; },
-      [fc,g]() { string ret = "(" + to_string(g) + "*(" + fc.dx_str() + ")*(" + fc.str() + "^" + to_string(g-1) + "))"; return ret; }  
+      [fc,g]() { string ret = "(" + fc.str() + ")^" + to_string(g); return ret; },
+      [fc,g]() { string ret = "(" + to_string(g) + "*(" + fc.dx_str() + ")*(" + fc.str() + ")^" + to_string(g-1) + ")"; return ret; }  
     };
 }
 
@@ -144,7 +144,7 @@ constexpr inline auto sin(const F& f ) {
       [fc]( double v ){ return sin( fc.e(v) ); }, 
       [fc]( double v ){ return cos( fc.e(v) )*fc.dx(v); },
       [fc]() { string ret = "sin(" + fc.str() + ")"; return ret; },
-      [fc]() { string ret = "(cos(" + fc.str() + ")*(" + fc.dx_str() + "))"; return ret; }  
+      [fc]() { string ret = "(cos(" + fc.str() + ")*" + fc.dx_str() + ")"; return ret; }  
     };
 }
 
@@ -155,7 +155,7 @@ constexpr inline auto cos(const F& f ) {
       [fc]( double v ){ return cos( fc.e(v) ); }, 
       [fc]( double v ){ return 0 - sin( fc.e(v) )*fc.dx(v); },
       [fc]() { string ret = "cos(" + fc.str() + ")"; return ret; },
-      [fc]() { string ret = "(-sin(" + fc.str() + ")*(" + fc.dx_str() + "))"; return ret; } 
+      [fc]() { string ret = "(-sin(" + fc.str() + ")*" + fc.dx_str() + ")"; return ret; } 
     };
 }
 
@@ -166,7 +166,7 @@ constexpr inline auto exp(const F& f ) {
       [fc]( double v ){ return exp( fc.e(v) ); }, 
       [fc]( double v ){ return fc.dx(v)*exp( fc.e(v) ); },
       [fc]() { string ret = "exp(" + fc.str() + ")"; return ret; },
-      [fc]() { string ret = "((" + fc.dx_str() + ")*exp(" + fc.str() + "))"; return ret; }  
+      [fc]() { string ret = "(exp(" + fc.str() + ")*(" + fc.dx_str() + "))"; return ret; }  
     };
 }
 
@@ -177,6 +177,6 @@ constexpr inline auto log(const F& f ) {
       [fc]( double v ){ return log( fc.e(v) ); }, 
       [fc]( double v ){ return fc.dx(v) / fc.e(v); },
       [fc]() { string ret = "log(" + fc.str() + ")"; return ret; },
-      [fc]() { string ret = "((" + fc.dx_str() + ")/(" + fc.str() + "))"; return ret; }   
+      [fc]() { string ret = "(1/" + fc.str() + ")*(" + fc.dx_str() + ")"; return ret; }   
       };
 }
