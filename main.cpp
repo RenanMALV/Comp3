@@ -2,42 +2,32 @@
 #include <algorithm>
 #include <array>
 
-#include "bind.cc"
+#include "otimizador.cc"
 
 using namespace std;
 
-long mdc( long a, long b ) { return b == 0 ? a : mdc( b, a%b ); }
 
-struct MMC {
-  auto operator()( long a, long b ) { return a*b/mdc(a,b); }    
-};
-
-struct BarraPesada {
-  template <typename A, typename B>
-  auto operator()( A a, B b ) {
-      return a + b;
-  } 
-};
-
-string ordena( string a, string b, string c, string d, string e, string f, string g, string h, string i, string j, string k, string l ) {
-  std::array<string, 12> tab = { a, b, c, d, e, f, g, h, i, j, k, l };
-  string result;
-  
-  std::sort( tab.begin(), tab.end() );
-  for( auto itr = tab.begin(); itr != tab.end(); ++itr )
-    result += *itr + " ";
-  
-  return result;    
-}
 
 int main() {
-    
-using ::bind;
+  Matriz<10,20> a;
+  Matriz<20,3> b;
+  cout << b[0][0] << endl;
+  b[0][0] = 10;
+  cout << b[0][0] << endl;
+
+  //auto c = a*b;
   
-auto f = bind( mdc, 12 ); 
-// f é uma função de um parâmetro que calcula o mdc entre 12 e o parâmetro passado.  
-cout << f( 9 ) << endl;
- // deve imprimir 3, que é o mdc entre 12 e 9.
+  // aplicar uma função à uma matriz:
+  
+  auto f = Apply( []( double x ){ return rand(); } );
+  b = f(b);
+  //c = f(c);
+  /* Vai calcular c[i][j] = g( c[i][j] ); */
+  //auto d = f(a) * b;
+  
+  //for( int i = 0; i < d.nLin(); i++ )
+  //  for( int j = 0; j < d.nCol(); j++ )
+  //    cout << d[i][j] << endl;
   
   return 0;
 }
