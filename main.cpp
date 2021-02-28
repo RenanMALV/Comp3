@@ -8,7 +8,7 @@ using namespace std;
 
 int main() {
   X x;
-  auto f = exp( x * log( x - 8.0 ) + 1.0 );
+  auto f = (x+3)->*2;
   double v = 10;
   
   cout << "f(" << v << ")=" << f.e( v ) << ", f'(" << v << ")=" << f.dx( v ) << endl;
